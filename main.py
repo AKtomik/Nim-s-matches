@@ -99,7 +99,7 @@ if (given_matches_total < 0):
 	given_matches_total=0
 for i in range (given_matches_total):
 	if (given_matches_total-i <= 3 and game_state==2):
-		page_matches+=f"""<section><img src="images/allumette4.png"><footer>{given_matches_total-i}</footer></section>"""
+		page_matches+=f"""<section><label for="matches_{given_matches_total-i}" class="link_label"><img src="images/allumette4.png" class="flammable"><footer>⮝</footer></label></section>"""
 	else:
 		page_matches+=f"""<section><img src="images/allumette1.png"></section>"""
 for i in range (given_matches_removed):
@@ -111,6 +111,13 @@ for i in range (given_matches_max-given_matches_total-given_matches_removed):
 
 
 #--- form ---
+
+
+def plurial(f_number):
+	if abs(f_number>1):
+		return "s"
+	else:
+		return ""
 
 
 match game_state:
@@ -156,13 +163,19 @@ match game_state:
 		</form>
 		"""
 	case 2:
+
+		if (given_matches_removed==0):
+			page_text_line2=""
+		#elif (given_matches_removed<=1):
+		else:
+			page_text_line2=f"<b>{given_matches_removed}</b> brûlé{plurial(given_matches_removed)} le dernier tour"
 		page_text=f"""
 		<h1 class="for_player">
-		c'est à <b>{game_player_play}</b></br>
+		c'est à <b>{game_player_play}</b>
 		</h1>
 		<p>
-		il reste <b>{given_matches_total}</b> alumettes
-		et <b>{given_matches_removed}</b> en ont été enlevés
+		il reste <b>{given_matches_total}</b> alumette{plurial(given_matches_total)}<br>
+		{page_text_line2}
 		</p>
 		"""
 		if (options_debug_satement): 
@@ -197,20 +210,19 @@ match game_state:
 			else:
 				here_checked=""
 			page_form_check+=f"""
-			<input type ="radio" id="matches_{i+1}" name="send_matches_removed" value="{i+1}"{here_checked}>
+			<input type ="radio" class="matche" id="matches_{i+1}" name="send_matches_removed" value="{i+1}"{here_checked}>
 			<label for ="matches_{i+1}">{check_numbers_texts_old[i]}</label>
 			"""
+			#"""+page_form_check
 			i+=1
 
 
 		i=0
 		page_form_sentances=""
-		here_pluria=""
 		while (i<3 and i<given_matches_total):
 			page_form_sentances+=f"""
-			<label class="sentance" id="sentance_{i+1}">brûler <b>{check_numbers_texts[i]}</b> alumette{here_pluria}</label>
+			<label class="sentance" id="sentance_{i+1}">brûler <b>{check_numbers_texts[i]}</b> alumette{plurial(i+1)}</label>
 			"""
-			here_pluria="s"
 			i+=1
 
 		page_form_inside=f"""
@@ -235,7 +247,7 @@ match game_state:
 				<li>
 					<div class="sentances">
 					{page_form_check}
-						{page_form_sentances}
+					{page_form_sentances}
 					</div>
 				</li>
 				<li>
@@ -268,6 +280,11 @@ page_css=f"""
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
 body {{
 
+	.link_label {{
+		cursor: pointer;
+	}}
+
+
 	aside {{/*images*/
 		display: flex;
 		text-align: justify;
@@ -276,12 +293,16 @@ body {{
 			text-align: center;
 			img {{
 				width:100%;
-				height:80%;
+				height:90%;
+			}}
+			.flammable {{
+				width:100%;
+				height:90%;
 			}}
 
 			footer {{
 				width:100%;
-				height:20%;
+				height:0%;/*!no matter*/
 			}}
 		}}
 	}}
@@ -335,19 +356,21 @@ body {{
 			
 				display: flex;
 				justify-content: center;
-				padding-bottom: 30px;/*!*/
+				margin-bottom: 30px;/*!*/
 
 				/* class for each frame and checker. used to hide :*/
-				.checks {{ /*!!!*/
-					opacity: 0;
+				.matche {{ 
+					opacity: 1;
+					z-align:1;
 				}}
 				/* using id bcs it must be unic, and for for= */
-				#sentance_1, #sentance_2, #sentance_3 {{
-					padding-top: 30px;/*!*/
+				.sentance {{/*for each of them*/
+					margin-top: 30px;/*!*/
 					opacity: 0;
 					position: absolute;
 					text-align: center;
 					text-intend: 0px;
+					z-align:0;
 				}}
 				#matches_1:checked ~ #sentance_1 {{
 					opacity: 1;
