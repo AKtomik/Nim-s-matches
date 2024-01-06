@@ -11,7 +11,9 @@ datas=cgi.FieldStorage()
 
 
 from random import randint as rickroll
-debug_satement=False
+options_debug_satement=False
+options_player_color_1="#ff0000"
+options_player_color_2="#0000ff"
 
 #--- data get ---
 
@@ -39,7 +41,7 @@ game_state=2
 #is round informations missing ?
 if ((given_matches_total==None) or (given_player==None)):
 	#yes ? restart the game.
-	if (debug_satement): print("<p>DBUG : action/restart</p>")
+	if (options_debug_satement): print("<p>DBUG : action/restart</p>")
 	if (given_matches_max!= None): given_matches_total=int(given_matches_max)
 	given_matches_removed=0
 	given_player=(rickroll(0,1)==1)
@@ -52,7 +54,7 @@ else:
 #is menu informations missing ?
 if ((given_playername_1==None) or (given_playername_2==None) or (given_matches_max==None)):
 	#yes ? goto menu.
-	if (debug_satement): print("<p>DBUG : action/menu</p>")
+	if (options_debug_satement): print("<p>DBUG : action/menu</p>")
 	game_state=1
 	if (given_matches_max == None):
 		given_matches_max=21
@@ -68,9 +70,11 @@ else:
 
 
 if (given_player):
+	game_player_color=options_player_color_1
 	game_player_play=given_playername_1
 	game_player_other=given_playername_2
 else:
+	game_player_color=options_player_color_2
 	game_player_play=given_playername_2
 	game_player_other=given_playername_1
 
@@ -112,7 +116,7 @@ match game_state:
 		bienvenue
 		</h1>
 		<p>
-			c'est le lancement
+			saisisez vos informations pour jouer !
 		</p>
 		"""
 		form_default_playername_1=given_playername_1
@@ -129,22 +133,20 @@ match game_state:
 		<form method ="GET" action ="main.py">
 		<ul>
 			<input type ="hidden" name ="send_matches_removed" value="{given_matches_removed}"/>
-
-
 			<li>
-				<label for ="name1">Nom du joueur 1 :</label>
+				<label for ="name1" class="for_player_1">joueur 1 :</label>
 				<input type ="text" id="name1" name ="send_playername_1" value="{given_playername_1}"/>
 			</li>
 			<li>
-				<label for ="name2">Nom du joueur 2 :</label>
+				<label for ="name2" class="for_player_2">joueur 2 :</label>
 				<input type ="text" id="name2" name ="send_playername_2" value="{given_playername_2}"/>
 			</li>
 			<li>
-				<label for ="matches_max">alumettes</label>
+				<label for ="matches_max">alumettes :</label>
 				<input type ="text" id="matches_max" name ="send_matches_max" value="{given_matches_max}"/>
 			</li>
 			<li>
-				<input type ="submit" value ="OK">
+				<input type ="submit" value ="OK" class="button">
 			</li>
 		</ul>
 		</form>
@@ -152,12 +154,14 @@ match game_state:
 	case 2:
 		page_text=f"""
 		<p>
+		<h1 class="for_player">
 		c'est à <b>{game_player_play}</b></br>
+		</h1>
 		il reste <b>{given_matches_total}</b> alumettes
 		et <b>{given_matches_removed}</b> en ont été enlevés
 		</p>
 		"""
-		if (debug_satement): 
+		if (options_debug_satement): 
 			page_text+=f"""
 			<p>
 			DBUG :</br>
@@ -170,7 +174,6 @@ match game_state:
 			"""
 
 		page_form_inside=f"""
-		<ul>
 			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
 			<input type ="hidden" name ="send_player" value="{not given_player}"/>
@@ -178,31 +181,30 @@ match game_state:
 			<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/>
 			<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
 
-
-                <div class="tbouton">
-				<label for ="matches">Nombre d'alumettes prises</label><br>
-                </div>
-                <div class="bouton">
-				<input type ="radio" id="matches_1" name="send_matches_removed" value="1" checked>
-				<label for ="matches_1">Un</label>
-				<input type ="radio" id="matches_2" name="send_matches_removed" value="2">
-				<label for ="matches_2">Deux</label>
-				<input type ="radio" id="matches_3" name="send_matches_removed" value="3">
-				<label for ="matches_3">Trois</label>
-                </div>
-                
-                <div class ="ok">
-				<input type ="submit" value ="OK">
-                </div>
-			</li>
-
-
-		</ul>
+			<ul>
+				<li>
+					<b>
+						<label for ="matches">Nombre d'alumettes prises</label><br>
+					</b>
+				</li>
+				<li>
+					<input type ="radio" id="matches_1" name="send_matches_removed" value="1" checked>
+					<label for ="matches_1">Un</label>
+					<input type ="radio" id="matches_2" name="send_matches_removed" value="2">
+					<label for ="matches_2">Deux</label>
+					<input type ="radio" id="matches_3" name="send_matches_removed" value="3">
+					<label for ="matches_3">Trois</label>
+				</li>
+				
+				<li>
+					<input type ="submit" value ="OK" class="button">
+				</li>
+			<ul>
 		"""
 	case 3:
 		page_text=f"""
-		<h1>
-			win
+		<h1 class="for_player">
+			GG
 		</h1>
 		<p>
 			<b>{game_player_play}</b> a gagné
@@ -214,40 +216,78 @@ match game_state:
 		<ul>
 			<li>
 				<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
-				<input type ="submit" value ="RECOMMENCER">
+				<input type ="submit" value ="RECOMMENCER" class="button">
 			</li>
 		</ul>
 		"""
 
-page_css="""
+page_css=f"""
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
-.matches_images {
-	display: flex;
-	justify-content: center;   
-}
-.tbouton {
-    display: flex;
-	justify-content: center;
-	font-family: 'Open Sans', sans-serif;
-    font-weight: 900;
-}
-.bouton {
-    display: flex;
-	justify-content: center;
-	font-family: 'Open Sans', sans-serif;
-}
-.ok {
-    display: flex;
-	justify-content: center;
-}
+body {{
+
+	aside {{/*images*/
+		display: flex;
+		justify-content: center;
+	}}
+
+	.for_player {{
+		color: {game_player_color};
+	}}
+	.for_player_1 {{
+		color: {options_player_color_1};
+	}}
+	.for_player_2 {{
+		color: {options_player_color_2};
+	}}
+
+	section {{/*text+form*/
+		font-family: 'Open Sans', sans-serif;
+		header {{/*the text decription*/
+			margin: 5px;
+			text-align: center;
+			
+			h1 {{/*title*/
+				font-weight: 500;
+			}}
+			p {{/*paragraph*/
+			}}
+			b {{/*bold*/
+				font-weight: 900;
+			}}
+		}}
+
+		article {{/*the form*/
+			margin: 5px;
+			li {{/*each element*/
+				display: flex;
+				justify-content: center;
+			}}
+			label {{
+				margin: 0px 5px 0px 5px;
+			}}
+			b {{/*bold*/
+				font-weight: 900;
+			}}
+			input[type='radio'] {{
+			    accent-color: {game_player_color};
+			}}
+			.button {{/*the button*/
+				background-color: #cccccc;
+				padding: 5px;
+				margin: 5px;
+				color: #330033;
+				text-align: center;
+				font-size: 100%;
+			}}
+		}}
+	}}
+}}
 """
 
 
 
 page_form=f"""
-<form method ="GET" action ="main.py">
 {page_form_inside}
-</form>
 """
 
 #--- assembly ---
@@ -262,12 +302,20 @@ print(f"""
 <body>
 
 
-
-<div class="matches_images">
-{page_matches}
-</div>
-{page_text}
-{page_form}
+<!-- the form is this big to be able having form element at differents places -->
+<form method ="GET" action ="main.py">
+	<aside>
+	{page_matches}
+	</aside>
+	<section>
+		<header>
+			{page_text}
+		</header>
+		<article>
+			{page_form}
+		</article>
+	</section>
+</form>
 
 
 </body>
