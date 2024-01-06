@@ -98,11 +98,15 @@ page_matches=""
 if (given_matches_total < 0):
 	given_matches_total=0
 for i in range (given_matches_total):
-	page_matches+=f"""<img src="images/allumette1.png" height="{25}%" width="{3}%">"""
+	if (given_matches_total-i <= 3 and game_state==2):
+		page_matches+=f"""<section><img src="images/allumette4.png"><footer>{given_matches_total-i}</footer></section>"""
+	else:
+		page_matches+=f"""<section><img src="images/allumette1.png"></section>"""
 for i in range (given_matches_removed):
-	page_matches+=f"""<img src="images/allumette2.png" height="{25}%" width="{3}%">"""
+	page_matches+=f"""<section><img src="images/allumette2.png"></section>"""
 for i in range (given_matches_max-given_matches_total-given_matches_removed):
-	page_matches+=f"""<img src="images/allumette3.png" height="{25}%" width="{3}%">"""
+	page_matches+=f"""<section><img src="images/allumette3.png"></section>"""
+# height="{25}%" width="{3}%"
 
 
 
@@ -153,10 +157,10 @@ match game_state:
 		"""
 	case 2:
 		page_text=f"""
-		<p>
 		<h1 class="for_player">
 		c'est à <b>{game_player_play}</b></br>
 		</h1>
+		<p>
 		il reste <b>{given_matches_total}</b> alumettes
 		et <b>{given_matches_removed}</b> en ont été enlevés
 		</p>
@@ -173,6 +177,42 @@ match game_state:
 			</p>
 			"""
 
+
+		check_numbers_texts_old=["Un","Deux","Trois"]
+		check_numbers_texts=["une","deux","trois"]
+
+		
+		if (given_matches_removed <= 0):
+			here_tocheck=1
+		elif (given_matches_removed>given_matches_total):
+			here_tocheck=given_matches_total
+		else:
+			here_tocheck=given_matches_removed
+
+		i=0
+		page_form_check=""
+		while (i<3 and i<given_matches_total):
+			if (here_tocheck==(i+1)):
+				here_checked=" checked"
+			else:
+				here_checked=""
+			page_form_check+=f"""
+			<input type ="radio" id="matches_{i+1}" name="send_matches_removed" value="{i+1}"{here_checked}>
+			<label for ="matches_{i+1}">{check_numbers_texts_old[i]}</label>
+			"""
+			i+=1
+
+
+		i=0
+		page_form_sentances=""
+		here_pluria=""
+		while (i<3 and i<given_matches_total):
+			page_form_sentances+=f"""
+			<label class="sentance" id="sentance_{i+1}">brûler <b>{check_numbers_texts[i]}</b> alumette{here_pluria}</label>
+			"""
+			here_pluria="s"
+			i+=1
+
 		page_form_inside=f"""
 			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
@@ -182,25 +222,28 @@ match game_state:
 			<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
 
 			<ul>
+				<!--
 				<li>
 					<b>
 						<label for ="matches">Nombre d'alumettes prises</label><br>
 					</b>
 				</li>
+				-->
 				<li>
-					<input type ="radio" id="matches_1" name="send_matches_removed" value="1" checked>
-					<label for ="matches_1">Un</label>
-					<input type ="radio" id="matches_2" name="send_matches_removed" value="2">
-					<label for ="matches_2">Deux</label>
-					<input type ="radio" id="matches_3" name="send_matches_removed" value="3">
-					<label for ="matches_3">Trois</label>
 				</li>
 				
+				<li>
+					<div class="sentances">
+					{page_form_check}
+						{page_form_sentances}
+					</div>
+				</li>
 				<li>
 					<input type ="submit" value ="OK" class="button">
 				</li>
 			<ul>
 		"""
+
 	case 3:
 		page_text=f"""
 		<h1 class="for_player">
@@ -227,7 +270,20 @@ body {{
 
 	aside {{/*images*/
 		display: flex;
+		text-align: justify;
 		justify-content: center;
+		section {{
+			text-align: center;
+			img {{
+				width:100%;
+				height:80%;
+			}}
+
+			footer {{
+				width:100%;
+				height:20%;
+			}}
+		}}
 	}}
 
 	.for_player {{
@@ -268,9 +324,43 @@ body {{
 			b {{/*bold*/
 				font-weight: 900;
 			}}
+
 			input[type='radio'] {{
 			    accent-color: {game_player_color};
 			}}
+			
+			
+
+			.sentances {{/* for all sentances */
+			
+				display: flex;
+				justify-content: center;
+				padding-bottom: 30px;/*!*/
+
+				/* class for each frame and checker. used to hide :*/
+				.checks {{ /*!!!*/
+					opacity: 0;
+				}}
+				/* using id bcs it must be unic, and for for= */
+				#sentance_1, #sentance_2, #sentance_3 {{
+					padding-top: 30px;/*!*/
+					opacity: 0;
+					position: absolute;
+					text-align: center;
+					text-intend: 0px;
+				}}
+				#matches_1:checked ~ #sentance_1 {{
+					opacity: 1;
+				}}
+				#matches_2:checked ~ #sentance_2 {{
+					opacity: 1;
+				}}
+				#matches_3:checked ~ #sentance_3 {{
+					opacity: 1;
+				}}
+			}}
+
+			
 			.button {{/*the button*/
 				background-color: #cccccc;
 				padding: 5px;
@@ -293,12 +383,13 @@ page_form=f"""
 #--- assembly ---
 
 print(f"""
+<!doctype html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	<style type="text/css">{page_css}</style>
 	<title>{page_title}</title>
-<head>
+</head>
 <body>
 
 
