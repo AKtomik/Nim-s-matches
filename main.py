@@ -92,10 +92,12 @@ if (check(given_state) or (given_state=="0")):
 		given_playername_1="unknow1"
 	if (check(given_playername_2, False)):
 		given_playername_2="unknow2"
+	
 	given_score_1="0"
 	given_score_2="0"
-	given_player=f"{(rickroll(0,1)==1)}"
-	#!
+	
+	given_player=(rickroll(0,1)==1)#!random starter
+	
 	given_round="0"
 	given_element_1="-1"
 	given_element_2="-1"
@@ -128,9 +130,9 @@ else:
 	if (given_state==1):
 		#check
 			
-		#starting... [->2]
-		game_state=2
-		if (options_debug_satement): print("<p>DBUG : action/start</p>")
+		#transition... [->4]
+		game_state=4
+		if (options_debug_satement): print("<p>DBUG : action/transition</p>")
 	
 		given_round="0"
 		given_matches_total=given_matches_max
@@ -166,6 +168,22 @@ else:
 			#fail_message=f"{given_element_1}!={hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  ({skip_check})"
 
 
+		if (given_state==4):
+			#check
+				
+			#starting... [->2]
+			game_state=2
+			if (options_debug_satement): print("<p>DBUG : action/start</p>")
+		
+			if (given_matches_total!=given_matches_max or given_matches_total<0 or given_matches_max<0):
+				cheater=True
+				fail_message=f"(incohérence)"
+			if (given_matches_removed!=0):
+				cheater=True
+				fail_message=f"(incohérence)"
+			if (given_round!=0):
+				cheater=True
+				fail_message=f"(incohérence)"
 		
 
 		if (given_state==2):
@@ -173,7 +191,7 @@ else:
 			if (given_matches_total>given_matches_max or given_matches_total<0 or given_matches_max<0 ):
 				cheater=True
 				fail_message=f"(incohérence)"
-			if (given_matches_removed>3 or given_matches_removed<0):
+			if (given_matches_removed>given_matches_burnable or given_matches_removed<0):
 			# or given_matches_total+given_matches_removed>given_matches_max or given_matches_total-given_matches_removed<0#noo !!
 				cheater=True
 				fail_message=f"(incohérence)"
@@ -198,7 +216,9 @@ else:
 			given_round=0#!
 			given_matches_total=given_matches_max
 			given_matches_removed=0
-			#given_player=(rickroll(0,1)==1)#!
+			
+			#given_player=(rickroll(0,1)==1)#!random starter
+			#not here !!
 
 
 
@@ -409,7 +429,7 @@ match game_state:
 		</details>
 		-->
 		<h1 class="for_player">
-		c'est à <b>{game_player_play}</b> {given_matches_burnable}
+		c'est à <b>{game_player_play}</b>
 		</h1>
 		"""
 		if (options_debug_satement): 
@@ -487,12 +507,25 @@ match game_state:
 		else:
 			given_score_2+=1
 
+		#for next round
+		if ((given_matches_max%(given_matches_burnable+1)%2==0)):
+			given_player=not given_player
+		else:
+			given_player=given_player
+		if (given_player):
+			game_playernext_play=given_playername_1
+		else:
+			game_playernext_play=given_playername_2
+
 		page_text=f"""
 		<h1 class="for_player">
-			GG
+			GG {game_player_play}
 		</h1>
 		<p>
-			<b>{game_player_play}</b> a gagné
+			<b>{game_player_play}</b> a gagné !
+		</p>
+		<p>
+			<b>{game_playernext_play}</b> commencera la prochaine partie
 		</p>
 		<p>
 			<section> </section>  <section class="for_player_1">{given_playername_1}  <b>{given_score_1}</b></section> - <section class="for_player_2"><b>{given_score_2}</b>  {given_playername_2}</section>
@@ -537,6 +570,44 @@ match game_state:
 			</li>
 		"""
 	
+	#transition
+	case 4:
+
+		page_text=f"""
+		<p>
+			tirage au sort
+		</p>
+		<p class="for_player">
+			<b>{game_player_play}</b> joue en premier !
+		</p>
+		<p>
+			<section> </section>  <section class="for_player_1">{given_playername_1}  <b>{given_score_1}</b></section> - <section class="for_player_2"><b>{given_score_2}</b>  {given_playername_2}</section>
+		</p>
+		"""
+		#<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
+		#<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
+		page_form_inside=f"""
+			<li>
+				
+				<input type ="hidden" name ="state" value="4"/>
+				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+				<input type ="hidden" name ="element_2" value="{given_element_2}"/>
+				
+				<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
+				<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
+				<input type ="hidden" name ="round" value="{given_round}"/>
+				<input type ="hidden" name ="score_1" value="{given_score_1}"/>
+				<input type ="hidden" name ="score_2" value="{given_score_2}"/>
+
+				<input type ="hidden" name ="player" value="{given_player}"/>
+				<input type ="hidden" name ="matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
+				<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
+				<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
+				<input type ="hidden" name ="matches_removed" value="0"/><!-- must be send -->
+
+				
+				<input type ="submit" value ="commencer" class="button">
+		"""
 
 
 css_flamed_frame=f"""
