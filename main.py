@@ -19,23 +19,23 @@ options_player_color_2="#0000ff"
 
 
 
-given_state=datas.getvalue("send_state")
-given_element_1=datas.getvalue("send_element_1")
-given_element_2=datas.getvalue("send_element_2")
+given_state=datas.getvalue("state")
+given_element_1=datas.getvalue("element_1")
+given_element_2=datas.getvalue("element_2")
 
-given_matches_max=datas.getvalue("send_matches_max")
-given_playername_1=datas.getvalue("send_playername_1")
-given_playername_2=datas.getvalue("send_playername_2")
-given_score_1=datas.getvalue("send_score_1")
-given_score_2=datas.getvalue("send_score_2")
+given_matches_max=datas.getvalue("matches_max")
+given_playername_1=datas.getvalue("playername_1")
+given_playername_2=datas.getvalue("playername_2")
+given_score_1=datas.getvalue("score_1")
+given_score_2=datas.getvalue("score_2")
 
 
 #true = player 1
 #false = player 2
-given_player=datas.getvalue("send_player")
-given_round=datas.getvalue("send_round")
-given_matches_total=datas.getvalue("send_matches_total")
-given_matches_removed=datas.getvalue("send_matches_removed")
+given_player=datas.getvalue("player")
+given_round=datas.getvalue("round")
+given_matches_total=datas.getvalue("matches_total")
+given_matches_removed=datas.getvalue("matches_removed")
 
 #--- state ---
 
@@ -282,7 +282,7 @@ match game_state:
 
 		page_form_inside=f"""
 		<ul>
-			<input type ="hidden" name ="send_state" value="0"/>
+			<input type ="hidden" name ="state" value="0"/>
 
 			<li>
 				<!--<label>tien, retourne au <b>menu</b> :</label>-->
@@ -322,30 +322,30 @@ match game_state:
 		
 
 		page_form_inside=f"""
-			<input type ="hidden" name ="send_state" value="1"/>
-			<input type ="hidden" name ="send_element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
-			<input type ="hidden" name ="send_element_2" value="{given_element_2}"/>
+			<input type ="hidden" name ="state" value="1"/>
+			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 
 
 			<li>
 				<label for ="name1" class="for_player_1">joueur 1 :</label>
-				<input type ="text" id="name1" name ="send_playername_1" value="{given_playername_1}"/>
+				<input type ="text" id="name1" name ="playername_1" value="{given_playername_1}"/>
 			</li>
 			<li>
 				<label for ="name2" class="for_player_2">joueur 2 :</label>
-				<input type ="text" id="name2" name ="send_playername_2" value="{given_playername_2}"/>
+				<input type ="text" id="name2" name ="playername_2" value="{given_playername_2}"/>
 			</li>
 			<li>
 				<label for ="matches_max">alumettes :</label>
-				<input type ="text" id="matches_max" name ="send_matches_max" value="{given_matches_max}"/>
+				<input type ="text" id="matches_max" name ="matches_max" value="{given_matches_max}"/>
 			</li>
 			<li>
 				<input type ="submit" value ="OK" class="button">
 			</li>
 
-			<input type ="hidden" name ="send_player" value="{given_player}"/>
-			<input type ="hidden" name ="send_score_1" value="{given_score_1}"/>
-			<input type ="hidden" name ="send_score_2" value="{given_score_2}"/>
+			<input type ="hidden" name ="player" value="{given_player}"/>
+			<input type ="hidden" name ="score_1" value="{given_score_1}"/>
+			<input type ="hidden" name ="score_2" value="{given_score_2}"/>
 		"""
 	case 2:
 
@@ -402,7 +402,7 @@ match game_state:
 			else:
 				here_checked=""
 			page_form_check+=f"""
-			<input type ="radio" class="matche" id="matches_{i+1}" name="send_matches_removed" value="{i+1}"{here_checked}>
+			<input type ="radio" class="matche" id="matches_{i+1}" name="matches_removed" value="{i+1}"{here_checked}>
 			<label for ="matches_{i+1}">{check_numbers_texts_old[i]}</label>
 			"""
 			#"""+page_form_check
@@ -421,19 +421,19 @@ match game_state:
 		given_player=not given_player
 		page_form_inside=f"""
 
-			<input type ="hidden" name ="send_state" value="2"/>
-			<input type ="hidden" name ="send_element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
-			<input type ="hidden" name ="send_element_2" value="{given_element_2}"/>
+			<input type ="hidden" name ="state" value="2"/>
+			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 
-			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
-			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
-			<input type ="hidden" name ="send_round" value="{given_round}"/>
-			<input type ="hidden" name ="send_score_1" value="{given_score_1}"/>
-			<input type ="hidden" name ="send_score_2" value="{given_score_2}"/>
+			<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
+			<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
+			<input type ="hidden" name ="round" value="{given_round}"/>
+			<input type ="hidden" name ="score_1" value="{given_score_1}"/>
+			<input type ="hidden" name ="score_2" value="{given_score_2}"/>
 			
-			<input type ="hidden" name ="send_player" value="{given_player}"/>
-			<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/>
-			<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
+			<input type ="hidden" name ="player" value="{given_player}"/>
+			<input type ="hidden" name ="matches_total" value="{given_matches_total}"/>
+			<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
 
 
 				<!--
@@ -474,25 +474,25 @@ match game_state:
 			<section> </section>  <section class="for_player_1">{given_playername_1}  <b>{given_score_1}</b></section> - <section class="for_player_2"><b>{given_score_2}</b>  {given_playername_2}</section>
 		</p>
 		"""
-		#<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
-		#<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
+		#<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
+		#<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
 		page_form_inside=f"""
 			<li>
 				
-				<input type ="hidden" name ="send_state" value="3"/>
-				<input type ="hidden" name ="send_element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
-				<input type ="hidden" name ="send_element_2" value="{given_element_2}"/>
+				<input type ="hidden" name ="state" value="3"/>
+				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+				<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 				
-				<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
-				<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
-				<input type ="hidden" name ="send_round" value="{given_round}"/>
-				<input type ="hidden" name ="send_score_1" value="{given_score_1}"/>
-				<input type ="hidden" name ="send_score_2" value="{given_score_2}"/>
+				<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
+				<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
+				<input type ="hidden" name ="round" value="{given_round}"/>
+				<input type ="hidden" name ="score_1" value="{given_score_1}"/>
+				<input type ="hidden" name ="score_2" value="{given_score_2}"/>
 
-				<input type ="hidden" name ="send_player" value="{given_player}"/>
-				<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
-				<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
-				<input type ="hidden" name ="send_matches_removed" value="0"/><!-- must be send -->
+				<input type ="hidden" name ="player" value="{given_player}"/>
+				<input type ="hidden" name ="matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
+				<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
+				<input type ="hidden" name ="matches_removed" value="0"/><!-- must be send -->
 
 				
 				<input type ="submit" value ="recomencer" class="button">
@@ -500,12 +500,12 @@ match game_state:
 			</li>
 			<li>
 				<form method ="GET" action ="main.py">
-					<input type ="hidden" name ="send_state" value="0"/>
+					<input type ="hidden" name ="state" value="0"/>
 					<!--it make it like a list, so except an error, so reset-->
 
-					<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
-					<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
-					<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
+					<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
+					<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
+					<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
 					
 					<input type ="submit" value ="quitter" class="button">
 			</li>
