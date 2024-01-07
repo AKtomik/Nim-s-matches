@@ -23,7 +23,7 @@ given_state=datas.getvalue("state")
 given_element_1=datas.getvalue("element_1")
 given_element_2=datas.getvalue("element_2")
 
-given_matches_burnable=datas.getvalue("matches_burnable")
+given_matches_flammable=datas.getvalue("matches_flammable")
 given_matches_max=datas.getvalue("matches_max")
 given_playername_1=datas.getvalue("playername_1")
 given_playername_2=datas.getvalue("playername_2")
@@ -44,6 +44,7 @@ given_matches_removed=datas.getvalue("matches_removed")
 # 1 = game's menu. select your names and other things.
 # 2 = gameplay. just, playing.
 # 3 = end. who wins ? me
+# 4 = transition, after menu.
 game_state=-1
 cheater=False
 skip_check=False
@@ -65,7 +66,7 @@ def check(f_value, f_intcheck=True):
 
 
 #hash value
-#hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)
+#hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)
 def hash1(f_int_m1, f_int_m2, f_int_m3, f_int_i1, f_int_i2, f_int_r2, f_int_r1, f_bool1):
 	return (f_int_m1+1)*(f_int_r1+1) +(f_int_m2+1)**3 +(f_int_m3+1)**5  +(f_int_i1+1)*(f_int_i2+1)  +f_int_r2  +(round(1/f_int_r1*100))  -f_bool1
 	
@@ -73,7 +74,7 @@ def hash1(f_int_m1, f_int_m2, f_int_m3, f_int_i1, f_int_i2, f_int_r2, f_int_r1, 
 
 
 #special case :
-if ((given_state=="1") and (check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max) or check(given_matches_burnable))):
+if ((given_state=="1") and (check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max) or check(given_matches_flammable))):
 	given_state="0"
 	fail_message="remplis intégralement les options !"
 
@@ -85,8 +86,8 @@ if (check(given_state) or (given_state=="0")):
 	given_state="0"
 	if (check(given_matches_max)):
 		given_matches_max="21"
-	if (check(given_matches_burnable)):
-		given_matches_burnable="3"
+	if (check(given_matches_flammable)):
+		given_matches_flammable="3"
 	given_matches_total=given_matches_max
 	if (check(given_playername_1, False)):
 		given_playername_1="unknow1"
@@ -96,7 +97,8 @@ if (check(given_state) or (given_state=="0")):
 	given_score_1="0"
 	given_score_2="0"
 	
-	given_player=(rickroll(0,1)==1)#!random starter
+	given_player=True#!must be set
+	#random is after
 	
 	given_round="0"
 	given_element_1="-1"
@@ -112,7 +114,7 @@ given_state=int(given_state)#only this value can be here
 
 
 #here you must have menu information.
-if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1,False) or check(given_score_2,False) or check(given_matches_max) or check(given_matches_burnable)):
+if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1) or check(given_score_2) or check(given_matches_max) or check(given_matches_flammable)):
 	#no ? ur cheater. [->0]
 	cheater=True
 	fail_message=f"(manque)"
@@ -122,7 +124,7 @@ else:
 
 	given_player=(given_player=="True")
 	given_matches_max=int(given_matches_max)
-	given_matches_burnable=int(given_matches_burnable)
+	given_matches_flammable=int(given_matches_flammable)
 	given_score_1=int(given_score_1)
 	given_score_2=int(given_score_2)
 
@@ -161,11 +163,11 @@ else:
 
 
 		#ultimate check
-		if (options_debug_satement): print(f"hash ; {given_element_1}=={hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  (skip:{skip_check})")
-		if (not ((skip_check) or (given_element_1==hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)))):
+		if (options_debug_satement): print(f"hash ; {given_element_1}=={hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  (skip:{skip_check})")
+		if (not ((skip_check) or (given_element_1==hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)))):
 			cheater=True
 			fail_message=f"(hash)"
-			#fail_message=f"{given_element_1}!={hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  ({skip_check})"
+			#fail_message=f"{given_element_1}!={hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  ({skip_check})"
 
 
 		if (given_state==4):
@@ -191,7 +193,7 @@ else:
 			if (given_matches_total>given_matches_max or given_matches_total<0 or given_matches_max<0 ):
 				cheater=True
 				fail_message=f"(incohérence)"
-			if (given_matches_removed>given_matches_burnable or given_matches_removed<0):
+			if (given_matches_removed>given_matches_flammable or given_matches_removed<0):
 			# or given_matches_total+given_matches_removed>given_matches_max or given_matches_total-given_matches_removed<0#noo !!
 				cheater=True
 				fail_message=f"(incohérence)"
@@ -240,6 +242,11 @@ else:
 	given_element_2=rickroll(254,2047)
 
 
+#random selector
+if (game_state==1):
+	given_player=(rickroll(0,1)==1)
+
+
 if (given_player):
 	game_player_color=options_player_color_1
 	game_player_play=given_playername_1
@@ -272,7 +279,7 @@ else:
 	if (given_matches_total < 0):
 		given_matches_total=0
 	for i in range (given_matches_total):
-		if (given_matches_total-i <= 3 and game_state==2):
+		if (given_matches_total-i <= given_matches_flammable and game_state==2):
 			page_matches+=f"""<section><label for="matches_{given_matches_total-i}" id="flame_frame_{given_matches_total-i}" class="link_label flame_frame"><img src="images/allumette4.png" class="flammable"><footer>⮝</footer></label></section>"""
 		else:
 			page_matches+=f"""<section><img src="images/allumette1.png"></section>"""
@@ -372,8 +379,8 @@ match game_state:
 				<input type ="text" id="matches_max" name ="matches_max" value="{given_matches_max}"/>
 			</li>
 			<li>
-				<label for ="matches_burnable">brûlables :</label>
-				<input type ="text" id="matches_burnable" name ="matches_burnable" value="{given_matches_burnable}"/>
+				<label for ="matches_flammable">brûlables :</label>
+				<input type ="text" id="matches_flammable" name ="matches_flammable" value="{given_matches_flammable}"/>
 			</li>
 			<li>
 				<input type ="submit" value ="OK" class="button">
@@ -395,7 +402,7 @@ match game_state:
 			here_tocheck=given_matches_removed
 		i=0
 		page_root_check=""
-		while (i<3 and i<given_matches_total):
+		while (i<given_matches_flammable and i<given_matches_total):
 			if (here_tocheck==(i+1)):
 				here_checked=" checked"
 			else:
@@ -445,17 +452,20 @@ match game_state:
 			"""
 
 
-		check_numbers_texts_old=["Un","Deux","Trois"]
-		check_numbers_texts=["une","deux","trois"]
+		check_numbers_texts=["une","deux","trois","quatre","cinq","six","sept","huit","neuf"]
 
 		
 
 
 		i=0
 		page_form_sentances=""
-		while (i<3 and i<given_matches_total):
+		while (i<given_matches_flammable and i<given_matches_total):
+			if (i < len(check_numbers_texts)):
+				here_number=check_numbers_texts[i]
+			else:
+				here_number=str(i+1)
 			page_form_sentances+=f"""
-			<label class="flame_sentance" id="flame_sentance_{i+1}">brûler <b>{check_numbers_texts[i]}</b> alumette{plurial(i+1)}</label>
+			<label class="flame_sentance" id="flame_sentance_{i+1}">brûler <b>{here_number}</b> alumette{plurial(i+1)}</label>
 			"""
 			i+=1
 
@@ -464,7 +474,7 @@ match game_state:
 		page_form_inside=f"""
 
 			<input type ="hidden" name ="state" value="2"/>
-			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
 			<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 
 			<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
@@ -477,7 +487,7 @@ match game_state:
 			<input type ="hidden" name ="player" value="{given_player}"/>
 			<input type ="hidden" name ="matches_total" value="{given_matches_total}"/>
 			<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
-			<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
+			<input type ="hidden" name ="matches_flammable" value="{given_matches_flammable}"/>
 
 				<!--
 				<li>
@@ -508,24 +518,26 @@ match game_state:
 			given_score_2+=1
 
 		#for next round
-		if ((given_matches_max%(given_matches_burnable+1)%2==0)):
+		if ((given_matches_max%(given_matches_flammable+1)%2==0)):
 			given_player=not given_player
 		else:
 			given_player=given_player
 		if (given_player):
 			game_playernext_play=given_playername_1
+			game_playernext_digit="1"
 		else:
 			game_playernext_play=given_playername_2
+			game_playernext_digit="2"
 
 		page_text=f"""
 		<h1 class="for_player">
 			GG {game_player_play}
 		</h1>
 		<p>
-			<b>{game_player_play}</b> a gagné !
+			<b class="for_player">{game_player_play}</b> a gagné !
 		</p>
 		<p>
-			<b>{game_playernext_play}</b> commencera la prochaine partie
+			<b class="for_player_{game_playernext_digit}">{game_playernext_play}</b> commencera la prochaine partie
 		</p>
 		<p>
 			<section> </section>  <section class="for_player_1">{given_playername_1}  <b>{given_score_1}</b></section> - <section class="for_player_2"><b>{given_score_2}</b>  {given_playername_2}</section>
@@ -537,7 +549,7 @@ match game_state:
 			<li>
 				
 				<input type ="hidden" name ="state" value="3"/>
-				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
 				<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 				
 				<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
@@ -549,7 +561,7 @@ match game_state:
 				<input type ="hidden" name ="player" value="{given_player}"/>
 				<input type ="hidden" name ="matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
 				<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
-				<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
+				<input type ="hidden" name ="matches_flammable" value="{given_matches_flammable}"/>
 				<input type ="hidden" name ="matches_removed" value="0"/><!-- must be send -->
 
 				
@@ -564,7 +576,7 @@ match game_state:
 					<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
 					<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
 					<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
-					<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
+					<input type ="hidden" name ="matches_flammable" value="{given_matches_flammable}"/>
 					
 					<input type ="submit" value ="quitter" class="button">
 			</li>
@@ -575,7 +587,7 @@ match game_state:
 
 		page_text=f"""
 		<p>
-			tirage au sort
+			tirage au sort :
 		</p>
 		<p class="for_player">
 			<b>{game_player_play}</b> joue en premier !
@@ -590,7 +602,7 @@ match game_state:
 			<li>
 				
 				<input type ="hidden" name ="state" value="4"/>
-				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_flammable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
 				<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 				
 				<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
@@ -602,7 +614,7 @@ match game_state:
 				<input type ="hidden" name ="player" value="{given_player}"/>
 				<input type ="hidden" name ="matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
 				<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
-				<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
+				<input type ="hidden" name ="matches_flammable" value="{given_matches_flammable}"/>
 				<input type ="hidden" name ="matches_removed" value="0"/><!-- must be send -->
 
 				
@@ -622,6 +634,20 @@ img {{
 css_flamed_sentance=f"""
 opacity: 1;
 """
+
+css_flamed_chunk=""
+css_flamed_frames_in=""
+if (game_state!=0):
+
+	i=1
+	while (i<=given_matches_flammable and i<=given_matches_total):
+		css_flamed_frames_in+=f"#flame_frame_{i} {{ {css_flamed_frame} }}"
+		css_flamed_chunk+=f"""
+		#matches_{i}:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_{i} {{{css_flamed_sentance}}}
+		#matches_{i}:checked ~ aside>section{{ {css_flamed_frames_in} }}
+		"""
+		i+=1
+
 
 page_css=f"""
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
@@ -647,22 +673,8 @@ body {{
 		}}
 
 	/*image dynamic parth*/
-		#matches_1:checked ~ aside>section{{
-			#flame_frame_1 {{ {css_flamed_frame} }}
-		}}
-		#matches_2:checked ~ aside>section{{
-			#flame_frame_1 {{ {css_flamed_frame} }}
-			#flame_frame_2 {{ {css_flamed_frame} }}
-		}}
-		#matches_3:checked ~ aside>section{{
-			#flame_frame_1 {{ {css_flamed_frame} }}
-			#flame_frame_2 {{ {css_flamed_frame} }}
-			#flame_frame_3 {{ {css_flamed_frame} }}
-		}}
 	/*text dynamic parth*/
-		#matches_1:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_1 {{{css_flamed_sentance}}}
-		#matches_2:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_2 {{{css_flamed_sentance}}}
-		#matches_3:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_3 {{{css_flamed_sentance}}}
+		{css_flamed_chunk}
 
 
 
@@ -684,7 +696,7 @@ body {{
 			footer {{
 				
 				/* radio and parth to display is mooved to ROOT */
-				color:#550000;
+				color:#770077;
 
 				width:100%;
 				height:0%;/*!no matter*/
@@ -769,7 +781,7 @@ body {{
 				background-color: #cccccc;
 				padding: 5px;
 				margin: 5px;
-				color: #330033;
+				color: #770077;
 				text-align: center;
 				font-size: 100%;
 			}}
