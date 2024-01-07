@@ -20,6 +20,8 @@ options_player_color_2="#0000ff"
 
 
 given_state=datas.getvalue("send_state")
+given_check=datas.getvalue("send_check")
+given_random=datas.getvalue("send_random")
 
 given_matches_max=datas.getvalue("send_matches_max")
 given_playername_1=datas.getvalue("send_playername_1")
@@ -43,6 +45,7 @@ given_matches_removed=datas.getvalue("send_matches_removed")
 # 3 = end. who wins ? me
 game_state=-1
 cheater=False
+skip_check=False
 fail_message=""
 
 
@@ -60,8 +63,8 @@ def check(f_value, f_intcheck=True):
 	#isinstance(f_value, f_type)
 
 
-def hash1(f_int1, f_int2, f_int3, f_int4, f_bool1):
-	return 0
+def hash1(f_int1, f_int2, f_int3, f_int4, f_int5, f_int6, f_bool1):
+	return f_int1*f_int6+f_int2**3+f_int3*f_int4+f_int5-f_bool1
 	
 
 
@@ -89,6 +92,9 @@ if (check(given_state) or (given_state=="0")):
 	given_player=f"{(rickroll(0,1)==1)}"
 	#!
 	given_round="0"
+	given_check="-1"
+	given_random="-1"
+	skip_check=True
 	given_matches_removed="0"
 
 
@@ -102,6 +108,7 @@ given_state=int(given_state)#only this value can be here
 if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1,False) or check(given_score_2,False) or check(given_matches_max)):
 	#no ? ur cheater. [->0]
 	cheater=True
+	fail_message=f"(indice : manque)"
 	#1/0
 	
 else:
@@ -118,28 +125,45 @@ else:
 		if (options_debug_satement): print("<p>DBUG : action/start</p>")
 	
 		given_round="0"
+		given_check="-1"
+		given_random="-1"
+		skip_check=True
 		given_matches_total=given_matches_max
 		given_matches_removed="0"
+	
 
 	#here, you must have round informations.
-	if (check(given_matches_total) or check(given_matches_removed)):
-		if (options_debug_satement): print(f"<p>{check(given_matches_total)} or {check(given_matches_removed)}</p>")
+	if (check(given_matches_total) or check(given_matches_removed) or check(given_round) or check(given_random) or check(given_check)):
+		#if (options_debug_satement): print(f"<p>{check(given_matches_total)} or {check(given_matches_removed)}</p>")
 		#no ? ur cheater. [->0]
 		cheater=True
+		fail_message=f"(indice : manque)"
 		#1/0
 
 	else:
-		given_round=int(given_round)
 		given_matches_total=int(given_matches_total)
 		given_matches_removed=int(given_matches_removed)
+		given_round=int(given_round)
+		given_random=int(given_random)
+		given_check=int(given_check)
+
+		#ultimate check
+		if (not ((skip_check) or (given_check==hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)))):
+			cheater=True
+			fail_message=f"(indice : hash)"
+			#fail_message=f"{given_check}!={hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)}  ({skip_check})"
+
+		
 
 		if (given_state==2):
 			#checks
 			if (given_matches_total>given_matches_max or given_matches_total<0 or given_matches_max<0 ):
 				cheater=True
+				fail_message=f"(indice : incohérence)"
 			if (given_matches_removed>3 or given_matches_removed<0):
 			# or given_matches_total+given_matches_removed>given_matches_max or given_matches_total-given_matches_removed<0#noo !!
 				cheater=True
+				fail_message=f"(indice : incohérence)"
 
 			#continuing... [->2]
 			game_state=2
@@ -149,6 +173,7 @@ else:
 			#check
 			if (given_matches_total!=0):
 				cheater=True
+				fail_message=f"(indice : incohérence)"
 
 
 			#restarting... [->2]
@@ -164,6 +189,7 @@ else:
 if (game_state==-1):
 	#no ? ur cheater. [->0]
 	cheater=True
+	fail_message=f"(indice : fail)"
 	#1/0
 
 
@@ -172,6 +198,9 @@ if (cheater):
 	game_state=0
 	#avoid errors
 	given_player=False
+else:
+	#anti-cheat
+	given_random=rickroll(254,2047)
 
 
 if (given_player):
@@ -303,19 +332,26 @@ match game_state:
 		"""
 	case 2:
 
+		page_text_line1=f"il reste <b>{given_matches_total}</b> alumette{plurial(given_matches_total)}<br>"
 		if (given_matches_removed==0):
 			page_text_line2=""
 		#elif (given_matches_removed<=1):
 		else:
 			page_text_line2=f"<b>{given_matches_removed}</b> brûlé{plurial(given_matches_removed)} le dernier tour"
+			
 		page_text=f"""
+		<!--
+		<details>
+		<summary></summary>
+		<p>
+		{page_text_line1}
+		{page_text_line2}
+		</p>
+		</details>
+		-->
 		<h1 class="for_player">
 		c'est à <b>{game_player_play}</b>
 		</h1>
-		<p>
-		il reste <b>{given_matches_total}</b> alumette{plurial(given_matches_total)}<br>
-		{page_text_line2}
-		</p>
 		"""
 		if (options_debug_satement): 
 			page_text+=f"""
@@ -369,6 +405,8 @@ match game_state:
 		page_form_inside=f"""
 
 			<input type ="hidden" name ="send_state" value="2"/>
+			<input type ="hidden" name ="send_random" value="{given_random}"/>
+			<input type ="hidden" name ="send_check" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)}"/>
 
 			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
@@ -416,7 +454,7 @@ match game_state:
 			<b>{game_player_play}</b> a gagné
 		</p>
 		<p>
-			<section class="for_player_1">{given_score_1}</section> - <section class="for_player_2">{given_score_2}<section>
+			<section> </section>  <section class="for_player_1">{given_playername_1}  <b>{given_score_1}</b></section> - <section class="for_player_2"><b>{given_score_2}</b>  {given_playername_2}</section>
 		</p>
 		"""
 		#<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
@@ -425,6 +463,8 @@ match game_state:
 			<li>
 				
 				<input type ="hidden" name ="send_state" value="3"/>
+				<input type ="hidden" name ="send_random" value="{given_random}"/>
+				<input type ="hidden" name ="send_check" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)}"/>
 				
 				<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 				<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
