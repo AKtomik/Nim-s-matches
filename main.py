@@ -20,8 +20,8 @@ options_player_color_2="#0000ff"
 
 
 given_state=datas.getvalue("send_state")
-given_check=datas.getvalue("send_check")
-given_random=datas.getvalue("send_random")
+given_element_1=datas.getvalue("send_element_1")
+given_element_2=datas.getvalue("send_element_2")
 
 given_matches_max=datas.getvalue("send_matches_max")
 given_playername_1=datas.getvalue("send_playername_1")
@@ -64,7 +64,7 @@ def check(f_value, f_intcheck=True):
 
 
 def hash1(f_int1, f_int2, f_int3, f_int4, f_int5, f_int6, f_bool1):
-	return f_int1*f_int6+f_int2**3+f_int3*f_int4+f_int5-f_bool1
+	return (f_int1+1)*(f_int6+1)+(f_int2+1)**3+(f_int3+1)*(f_int4+1)+f_int5-f_bool1
 	
 
 
@@ -92,8 +92,8 @@ if (check(given_state) or (given_state=="0")):
 	given_player=f"{(rickroll(0,1)==1)}"
 	#!
 	given_round="0"
-	given_check="-1"
-	given_random="-1"
+	given_element_1="-1"
+	given_element_2="-1"
 	skip_check=True
 	given_matches_removed="0"
 
@@ -108,7 +108,7 @@ given_state=int(given_state)#only this value can be here
 if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1,False) or check(given_score_2,False) or check(given_matches_max)):
 	#no ? ur cheater. [->0]
 	cheater=True
-	fail_message=f"(indice : manque)"
+	fail_message=f"(manque)"
 	#1/0
 	
 else:
@@ -120,38 +120,41 @@ else:
 
 
 	if (given_state==1):
+		#check
+			
 		#starting... [->2]
 		game_state=2
 		if (options_debug_satement): print("<p>DBUG : action/start</p>")
 	
 		given_round="0"
-		given_check="-1"
-		given_random="-1"
-		skip_check=True
 		given_matches_total=given_matches_max
 		given_matches_removed="0"
 	
 
 	#here, you must have round informations.
-	if (check(given_matches_total) or check(given_matches_removed) or check(given_round) or check(given_random) or check(given_check)):
+	if (check(given_matches_total) or check(given_matches_removed) or check(given_round) or check(given_element_2) or check(given_element_1)):
 		#if (options_debug_satement): print(f"<p>{check(given_matches_total)} or {check(given_matches_removed)}</p>")
 		#no ? ur cheater. [->0]
 		cheater=True
-		fail_message=f"(indice : manque)"
+		fail_message=f"(manque)"
 		#1/0
 
 	else:
 		given_matches_total=int(given_matches_total)
 		given_matches_removed=int(given_matches_removed)
 		given_round=int(given_round)
-		given_random=int(given_random)
-		given_check=int(given_check)
+		given_element_2=int(given_element_2)
+		given_element_1=int(given_element_1)
+
+
 
 		#ultimate check
-		if (not ((skip_check) or (given_check==hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)))):
+		if (options_debug_satement): print(f"hash ; {given_element_1}=={hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}  (skip:{skip_check})")
+		if (not ((skip_check) or (given_element_1==hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)))):
 			cheater=True
-			fail_message=f"(indice : hash)"
-			#fail_message=f"{given_check}!={hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)}  ({skip_check})"
+			fail_message=f"(hash)"
+			#fail_message=f"{given_element_1}!={hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}  ({skip_check})"
+
 
 		
 
@@ -159,11 +162,15 @@ else:
 			#checks
 			if (given_matches_total>given_matches_max or given_matches_total<0 or given_matches_max<0 ):
 				cheater=True
-				fail_message=f"(indice : incohérence)"
+				fail_message=f"(incohérence)"
 			if (given_matches_removed>3 or given_matches_removed<0):
 			# or given_matches_total+given_matches_removed>given_matches_max or given_matches_total-given_matches_removed<0#noo !!
 				cheater=True
-				fail_message=f"(indice : incohérence)"
+				fail_message=f"(incohérence)"
+			if (given_round<0 or given_round>given_matches_max):
+				cheater=True
+				fail_message=f"(incohérence)"
+				
 
 			#continuing... [->2]
 			game_state=2
@@ -171,14 +178,14 @@ else:
 
 		if (given_state==3):
 			#check
-			if (given_matches_total!=0):
+			if (given_matches_total!=0 or given_matches_removed!=0):
 				cheater=True
-				fail_message=f"(indice : incohérence)"
+				fail_message=f"(incohérence)"
 
 
 			#restarting... [->2]
 			game_state=2
-			#given_round=0#!
+			given_round=0#!
 			given_matches_total=given_matches_max
 			given_matches_removed=0
 			#given_player=(rickroll(0,1)==1)#!
@@ -189,7 +196,7 @@ else:
 if (game_state==-1):
 	#no ? ur cheater. [->0]
 	cheater=True
-	fail_message=f"(indice : fail)"
+	fail_message=f"(fail)"
 	#1/0
 
 
@@ -200,7 +207,7 @@ if (cheater):
 	given_player=False
 else:
 	#anti-cheat
-	given_random=rickroll(254,2047)
+	given_element_2=rickroll(254,2047)
 
 
 if (given_player):
@@ -278,11 +285,19 @@ match game_state:
 			<input type ="hidden" name ="send_state" value="0"/>
 
 			<li>
+				<!--<label>tien, retourne au <b>menu</b> :</label>-->
 				<label>retourne jouer <b>normalement</b> :</label>
 			</li>
 			<li>
-				<input type ="submit" value ="OK" class="button">
+				<input type ="submit" value ="OK..." class="button">
+				</form>
 			</li>
+			<!--
+			<li>
+				<form method ="GET" action ="main.py">
+				<input type ="submit" value ="mais j'aime tricher" class="button">
+			</li>
+			-->
 		</ul>
 		"""
 
@@ -308,6 +323,8 @@ match game_state:
 
 		page_form_inside=f"""
 			<input type ="hidden" name ="send_state" value="1"/>
+			<input type ="hidden" name ="send_element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="send_element_2" value="{given_element_2}"/>
 
 
 			<li>
@@ -405,8 +422,8 @@ match game_state:
 		page_form_inside=f"""
 
 			<input type ="hidden" name ="send_state" value="2"/>
-			<input type ="hidden" name ="send_random" value="{given_random}"/>
-			<input type ="hidden" name ="send_check" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)}"/>
+			<input type ="hidden" name ="send_element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="send_element_2" value="{given_element_2}"/>
 
 			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
@@ -463,8 +480,8 @@ match game_state:
 			<li>
 				
 				<input type ="hidden" name ="send_state" value="3"/>
-				<input type ="hidden" name ="send_random" value="{given_random}"/>
-				<input type ="hidden" name ="send_check" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_random, given_player)}"/>
+				<input type ="hidden" name ="send_element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+				<input type ="hidden" name ="send_element_2" value="{given_element_2}"/>
 				
 				<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 				<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
