@@ -24,6 +24,8 @@ given_state=datas.getvalue("send_state")
 given_matches_max=datas.getvalue("send_matches_max")
 given_playername_1=datas.getvalue("send_playername_1")
 given_playername_2=datas.getvalue("send_playername_2")
+given_score_1=datas.getvalue("send_score_1")
+given_score_2=datas.getvalue("send_score_2")
 
 
 #true = player 1
@@ -41,6 +43,7 @@ given_matches_removed=datas.getvalue("send_matches_removed")
 # 3 = end. who wins ? me
 game_state=-1
 cheater=False
+fail_message=""
 
 
 def check(f_value, f_intcheck=True):
@@ -63,6 +66,12 @@ def hash1(f_int1, f_int2, f_int3, f_int4, f_bool1):
 
 
 
+#special case :
+if ((given_state=="1") and (check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max))):
+	given_state="0"
+	fail_message="remplis entièrement le formulaire !"
+
+
 if (check(given_state) or (given_state=="0")):
 	#reseting... [->1]
 	game_state=1
@@ -75,19 +84,22 @@ if (check(given_state) or (given_state=="0")):
 		given_playername_1="unknow1"
 	if (given_playername_2 == None):
 		given_playername_2="unknow2"
+	given_score_1="0"
+	given_score_2="0"
+	given_player=f"{(rickroll(0,1)==1)}"
 	#!
 	given_round="0"
-	given_player=f"{(rickroll(0,1)==1)}"
 	given_matches_removed="0"
 
 
 
 
 
-given_state=int(given_state)
+given_state=int(given_state)#only this value can be here
+
 
 #here you must have menu information.
-if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max)):
+if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1,False) or check(given_score_2,False) or check(given_matches_max)):
 	#no ? ur cheater. [->0]
 	cheater=True
 	#1/0
@@ -96,6 +108,8 @@ else:
 
 	given_player=(given_player=="True")
 	given_matches_max=int(given_matches_max)
+	given_score_1=int(given_score_1)
+	given_score_2=int(given_score_2)
 
 
 	if (given_state==1):
@@ -207,6 +221,9 @@ else:
 #--- form ---
 
 
+
+
+
 def plurial(f_number):
 	if abs(f_number>1):
 		return "s"
@@ -228,7 +245,6 @@ match game_state:
 
 
 		page_form_inside=f"""
-		<form method ="GET" action ="main.py">
 		<ul>
 			<input type ="hidden" name ="send_state" value="0"/>
 
@@ -239,7 +255,6 @@ match game_state:
 				<input type ="submit" value ="OK" class="button">
 			</li>
 		</ul>
-		</form>
 		"""
 
 	case 1:
@@ -260,10 +275,9 @@ match game_state:
 		if (given_playername_2=="unknow2"):
 			given_playername_2=""
 			
+		
 
 		page_form_inside=f"""
-		<form method ="GET" action ="main.py">
-		<ul>
 			<input type ="hidden" name ="send_state" value="1"/>
 
 
@@ -284,8 +298,8 @@ match game_state:
 			</li>
 
 			<input type ="hidden" name ="send_player" value="{given_player}"/>
-		</ul>
-		</form>
+			<input type ="hidden" name ="send_score_1" value="{given_score_1}"/>
+			<input type ="hidden" name ="send_score_2" value="{given_score_2}"/>
 		"""
 	case 2:
 
@@ -359,13 +373,14 @@ match game_state:
 			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
 			<input type ="hidden" name ="send_round" value="{given_round}"/>
+			<input type ="hidden" name ="send_score_1" value="{given_score_1}"/>
+			<input type ="hidden" name ="send_score_2" value="{given_score_2}"/>
 			
 			<input type ="hidden" name ="send_player" value="{given_player}"/>
 			<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/>
 			<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
 
 
-			<ul>
 				<!--
 				<li>
 					<b>
@@ -385,10 +400,14 @@ match game_state:
 				<li>
 					<input type ="submit" value ="OK" class="button">
 				</li>
-			<ul>
 		"""
 
 	case 3:
+		if (given_player):
+			given_score_1+=1
+		else:
+			given_score_2+=1
+
 		page_text=f"""
 		<h1 class="for_player">
 			GG
@@ -396,11 +415,13 @@ match game_state:
 		<p>
 			<b>{game_player_play}</b> a gagné
 		</p>
+		<p>
+			<section class="for_player_1">{given_score_1}</section> - <section class="for_player_2">{given_score_2}<section>
+		</p>
 		"""
 		#<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 		#<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
 		page_form_inside=f"""
-		<ul>
 			<li>
 				
 				<input type ="hidden" name ="send_state" value="3"/>
@@ -408,6 +429,8 @@ match game_state:
 				<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 				<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
 				<input type ="hidden" name ="send_round" value="{given_round}"/>
+				<input type ="hidden" name ="send_score_1" value="{given_score_1}"/>
+				<input type ="hidden" name ="send_score_2" value="{given_score_2}"/>
 
 				<input type ="hidden" name ="send_player" value="{given_player}"/>
 				<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
@@ -429,7 +452,6 @@ match game_state:
 					
 					<input type ="submit" value ="quitter" class="button">
 			</li>
-		</ul>
 		"""
 
 page_css=f"""
@@ -484,6 +506,9 @@ body {{
 			}}
 			p {{/*paragraph*/
 			}}
+			section {{
+				display: inline-block;
+			}}
 			b {{/*bold*/
 				font-weight: 900;
 			}}
@@ -494,6 +519,15 @@ body {{
 			li {{/*each element*/
 				display: flex;
 				justify-content: center;
+			}}
+			.fail {{
+				font-weight: 900;
+				color: #ff5500;
+				/*
+				border-style:solid;
+				border-width: 3px;
+				border-color: rgb(255,0,30);
+				*/
 			}}
 			label {{
 				margin: 0px 5px 0px 5px;
@@ -554,9 +588,22 @@ body {{
 """
 
 
+if (fail_message==""):
+	form_fail=""
+else:
+	form_fail=f"""
+<li class="fail">
+	<p>
+		{fail_message}
+	</p>
+</li>
+"""
 
 page_form=f"""
+<ul>
 {page_form_inside}
+{form_fail}
+</ul>
 """
 
 #--- assembly ---
