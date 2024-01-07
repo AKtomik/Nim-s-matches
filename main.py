@@ -243,7 +243,7 @@ else:
 		given_matches_total=0
 	for i in range (given_matches_total):
 		if (given_matches_total-i <= 3 and game_state==2):
-			page_matches+=f"""<section><label for="matches_{given_matches_total-i}" class="link_label"><img src="images/allumette4.png" class="flammable"><footer>⮝</footer></label></section>"""
+			page_matches+=f"""<section><label for="matches_{given_matches_total-i}" id="flame_frame_{given_matches_total-i}" class="link_label flame_frame"><img src="images/allumette4.png" class="flammable"><footer>⮝</footer></label></section>"""
 		else:
 			page_matches+=f"""<section><img src="images/allumette1.png"></section>"""
 	for i in range (given_matches_removed):
@@ -265,7 +265,7 @@ def plurial(f_number):
 		return "s"
 	else:
 		return ""
-
+page_root=""#not often used
 
 match game_state:
 
@@ -349,6 +349,30 @@ match game_state:
 		"""
 	case 2:
 
+		if (given_matches_removed <= 0):
+			here_tocheck=1
+		elif (given_matches_removed>given_matches_total):
+			here_tocheck=given_matches_total
+		else:
+			here_tocheck=given_matches_removed
+		i=0
+		page_root_check=""
+		while (i<3 and i<given_matches_total):
+			if (here_tocheck==(i+1)):
+				here_checked=" checked"
+			else:
+				here_checked=""
+			page_root_check=f"""
+			<input type ="radio" class="matche" id="matches_{i+1}" name="matches_removed" value="{i+1}"{here_checked}>
+			"""+page_root_check
+			i+=1
+		
+		page_root=f"{page_root_check}"
+
+
+
+
+
 		page_text_line1=f"il reste <b>{given_matches_total}</b> alumette{plurial(given_matches_total)}<br>"
 		if (given_matches_removed==0):
 			page_text_line2=""
@@ -387,33 +411,13 @@ match game_state:
 		check_numbers_texts=["une","deux","trois"]
 
 		
-		if (given_matches_removed <= 0):
-			here_tocheck=1
-		elif (given_matches_removed>given_matches_total):
-			here_tocheck=given_matches_total
-		else:
-			here_tocheck=given_matches_removed
-
-		i=0
-		page_form_check=""
-		while (i<3 and i<given_matches_total):
-			if (here_tocheck==(i+1)):
-				here_checked=" checked"
-			else:
-				here_checked=""
-			page_form_check+=f"""
-			<input type ="radio" class="matche" id="matches_{i+1}" name="matches_removed" value="{i+1}"{here_checked}>
-			<label for ="matches_{i+1}">{check_numbers_texts_old[i]}</label>
-			"""
-			#"""+page_form_check
-			i+=1
 
 
 		i=0
 		page_form_sentances=""
 		while (i<3 and i<given_matches_total):
 			page_form_sentances+=f"""
-			<label class="sentance" id="sentance_{i+1}">brûler <b>{check_numbers_texts[i]}</b> alumette{plurial(i+1)}</label>
+			<label class="flame_sentance" id="flame_sentance_{i+1}">brûler <b>{check_numbers_texts[i]}</b> alumette{plurial(i+1)}</label>
 			"""
 			i+=1
 
@@ -431,10 +435,10 @@ match game_state:
 			<input type ="hidden" name ="score_1" value="{given_score_1}"/>
 			<input type ="hidden" name ="score_2" value="{given_score_2}"/>
 			
+
 			<input type ="hidden" name ="player" value="{given_player}"/>
 			<input type ="hidden" name ="matches_total" value="{given_matches_total}"/>
 			<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
-
 
 				<!--
 				<li>
@@ -447,8 +451,8 @@ match game_state:
 				</li>
 				
 				<li>
-					<div class="sentances">
-					{page_form_check}
+					<div class="flame_sentances">
+					<p></p>
 					{page_form_sentances}
 					</div>
 				</li>
@@ -511,6 +515,20 @@ match game_state:
 			</li>
 		"""
 
+
+css_flamed_frame=f"""
+footer {{
+	color: {game_player_color};
+	opacity: 1;
+}}
+img {{
+	content: url("images/allumette5.png");
+}}
+"""
+css_flamed_sentance=f"""
+opacity: 1;
+"""
+
 page_css=f"""
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
 body {{
@@ -518,6 +536,40 @@ body {{
 	.link_label {{
 		cursor: pointer;
 	}}
+
+
+	/*dynamic parth. is to root to be able to make tow cousin dynamic*/
+	/*radio input*/
+		.matche {{
+			
+			/*
+		    accent-color: {game_player_color};
+			display: flex;
+			justify-content: center;
+			*/
+			position: absolute;
+			opacity: 0;
+			z-align: 1;
+		}}
+
+	/*image dynamic parth*/
+		#matches_1:checked ~ aside>section{{
+			#flame_frame_1 {{ {css_flamed_frame} }}
+		}}
+		#matches_2:checked ~ aside>section{{
+			#flame_frame_1 {{ {css_flamed_frame} }}
+			#flame_frame_2 {{ {css_flamed_frame} }}
+		}}
+		#matches_3:checked ~ aside>section{{
+			#flame_frame_1 {{ {css_flamed_frame} }}
+			#flame_frame_2 {{ {css_flamed_frame} }}
+			#flame_frame_3 {{ {css_flamed_frame} }}
+		}}
+	/*text dynamic parth*/
+		#matches_1:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_1 {{{css_flamed_sentance}}}
+		#matches_2:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_2 {{{css_flamed_sentance}}}
+		#matches_3:checked ~ section>article>ul>li>.flame_sentances>.flame_sentance#flame_sentance_3 {{{css_flamed_sentance}}}
+
 
 
 	aside {{/*images*/
@@ -532,10 +584,14 @@ body {{
 			}}
 			.flammable {{
 				width:100%;
-				height:90%;
+				height:91%;
 			}}
 
 			footer {{
+				
+				/* radio and parth to display is mooved to ROOT */
+				color:#550000;
+
 				width:100%;
 				height:0%;/*!no matter*/
 			}}
@@ -593,40 +649,24 @@ body {{
 				font-weight: 900;
 			}}
 
-			input[type='radio'] {{
-			    accent-color: {game_player_color};
-			}}
 			
 			
 
-			.sentances {{/* for all sentances */
+			.flame_sentances {{/* for all sentances */
 			
 				display: flex;
 				justify-content: center;
-				margin-bottom: 30px;/*!*/
+				/*margin-bottom: 30px;!*/
 
-				/* class for each frame and checker. used to hide :*/
-				.matche {{ 
-					opacity: 1;
-					z-align:1;
-				}}
-				/* using id bcs it must be unic, and for for= */
-				.sentance {{/*for each of them*/
-					margin-top: 30px;/*!*/
+				/* radio and parth to display is mooved to ROOT */
+
+				.flame_sentance {{/*hide and style*/
+					/*margin-top: 30px;!*/
 					opacity: 0;
 					position: absolute;
 					text-align: center;
 					text-intend: 0px;
 					z-align:0;
-				}}
-				#matches_1:checked ~ #sentance_1 {{
-					opacity: 1;
-				}}
-				#matches_2:checked ~ #sentance_2 {{
-					opacity: 1;
-				}}
-				#matches_3:checked ~ #sentance_3 {{
-					opacity: 1;
 				}}
 			}}
 
@@ -678,6 +718,7 @@ print(f"""
 
 <!-- the form is this big to be able having form element at differents places -->
 <form method ="GET" action ="main.py">
+	{page_root}
 	<aside>
 	{page_matches}
 	</aside>
