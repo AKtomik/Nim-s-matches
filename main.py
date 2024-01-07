@@ -23,6 +23,7 @@ given_state=datas.getvalue("state")
 given_element_1=datas.getvalue("element_1")
 given_element_2=datas.getvalue("element_2")
 
+given_matches_burnable=datas.getvalue("matches_burnable")
 given_matches_max=datas.getvalue("matches_max")
 given_playername_1=datas.getvalue("playername_1")
 given_playername_2=datas.getvalue("playername_2")
@@ -63,16 +64,18 @@ def check(f_value, f_intcheck=True):
 	#isinstance(f_value, f_type)
 
 
-def hash1(f_int1, f_int2, f_int3, f_int4, f_int5, f_int6, f_bool1):
-	return (f_int1+1)*(f_int6+1)+(f_int2+1)**3+(f_int3+1)*(f_int4+1)+f_int5-f_bool1
+#hash value
+#hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)
+def hash1(f_int_m1, f_int_m2, f_int_m3, f_int_i1, f_int_i2, f_int_r2, f_int_r1, f_bool1):
+	return (f_int_m1+1)*(f_int_r1+1) +(f_int_m2+1)**3 +(f_int_m3+1)**5  +(f_int_i1+1)*(f_int_i2+1)  +f_int_r2  +(round(1/f_int_r1*100))  -f_bool1
 	
 
 
 
 #special case :
-if ((given_state=="1") and (check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max))):
+if ((given_state=="1") and (check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max) or check(given_matches_burnable))):
 	given_state="0"
-	fail_message="remplis entièrement le formulaire !"
+	fail_message="remplis intégralement les options !"
 
 
 if (check(given_state) or (given_state=="0")):
@@ -80,12 +83,14 @@ if (check(given_state) or (given_state=="0")):
 	game_state=1
 	if (options_debug_satement): print("<p>DBUG : action/menu</p>")
 	given_state="0"
-	if (given_matches_max == None):
+	if (check(given_matches_max)):
 		given_matches_max="21"
+	if (check(given_matches_burnable)):
+		given_matches_burnable="3"
 	given_matches_total=given_matches_max
-	if (given_playername_1 == None):
+	if (check(given_playername_1, False)):
 		given_playername_1="unknow1"
-	if (given_playername_2 == None):
+	if (check(given_playername_2, False)):
 		given_playername_2="unknow2"
 	given_score_1="0"
 	given_score_2="0"
@@ -105,7 +110,7 @@ given_state=int(given_state)#only this value can be here
 
 
 #here you must have menu information.
-if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1,False) or check(given_score_2,False) or check(given_matches_max)):
+if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_score_1,False) or check(given_score_2,False) or check(given_matches_max) or check(given_matches_burnable)):
 	#no ? ur cheater. [->0]
 	cheater=True
 	fail_message=f"(manque)"
@@ -115,6 +120,7 @@ else:
 
 	given_player=(given_player=="True")
 	given_matches_max=int(given_matches_max)
+	given_matches_burnable=int(given_matches_burnable)
 	given_score_1=int(given_score_1)
 	given_score_2=int(given_score_2)
 
@@ -129,11 +135,15 @@ else:
 		given_round="0"
 		given_matches_total=given_matches_max
 		given_matches_removed="0"
+
+		given_element_1="-1"
+		given_element_2="-1"
+		skip_check=True
 	
 
 	#here, you must have round informations.
 	if (check(given_matches_total) or check(given_matches_removed) or check(given_round) or check(given_element_2) or check(given_element_1)):
-		#if (options_debug_satement): print(f"<p>{check(given_matches_total)} or {check(given_matches_removed)}</p>")
+		if (options_debug_satement): print(f"<p>({check(given_matches_total)} or {check(given_matches_removed)} or {check(given_round)} or {check(given_element_2)} or {check(given_element_1)})</p>")
 		#no ? ur cheater. [->0]
 		cheater=True
 		fail_message=f"(manque)"
@@ -149,11 +159,11 @@ else:
 
 
 		#ultimate check
-		if (options_debug_satement): print(f"hash ; {given_element_1}=={hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}  (skip:{skip_check})")
-		if (not ((skip_check) or (given_element_1==hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)))):
+		if (options_debug_satement): print(f"hash ; {given_element_1}=={hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  (skip:{skip_check})")
+		if (not ((skip_check) or (given_element_1==hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)))):
 			cheater=True
 			fail_message=f"(hash)"
-			#fail_message=f"{given_element_1}!={hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}  ({skip_check})"
+			#fail_message=f"{given_element_1}!={hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}  ({skip_check})"
 
 
 		
@@ -269,6 +279,7 @@ page_root=""#not often used
 
 match game_state:
 
+	#cheater page
 	case 0:
 		page_text=f"""
 		<h1>
@@ -301,6 +312,7 @@ match game_state:
 		</ul>
 		"""
 
+	#menu
 	case 1:
 		page_text=f"""
 		<h1>
@@ -323,7 +335,7 @@ match game_state:
 
 		page_form_inside=f"""
 			<input type ="hidden" name ="state" value="1"/>
-			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="element_1" value="-2"/>
 			<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 
 
@@ -340,6 +352,10 @@ match game_state:
 				<input type ="text" id="matches_max" name ="matches_max" value="{given_matches_max}"/>
 			</li>
 			<li>
+				<label for ="matches_burnable">brûlables :</label>
+				<input type ="text" id="matches_burnable" name ="matches_burnable" value="{given_matches_burnable}"/>
+			</li>
+			<li>
 				<input type ="submit" value ="OK" class="button">
 			</li>
 
@@ -347,6 +363,8 @@ match game_state:
 			<input type ="hidden" name ="score_1" value="{given_score_1}"/>
 			<input type ="hidden" name ="score_2" value="{given_score_2}"/>
 		"""
+	
+	#in game
 	case 2:
 
 		if (given_matches_removed <= 0):
@@ -391,7 +409,7 @@ match game_state:
 		</details>
 		-->
 		<h1 class="for_player">
-		c'est à <b>{game_player_play}</b>
+		c'est à <b>{game_player_play}</b> {given_matches_burnable}
 		</h1>
 		"""
 		if (options_debug_satement): 
@@ -426,7 +444,7 @@ match game_state:
 		page_form_inside=f"""
 
 			<input type ="hidden" name ="state" value="2"/>
-			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+			<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
 			<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 
 			<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
@@ -439,6 +457,7 @@ match game_state:
 			<input type ="hidden" name ="player" value="{given_player}"/>
 			<input type ="hidden" name ="matches_total" value="{given_matches_total}"/>
 			<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
+			<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
 
 				<!--
 				<li>
@@ -461,6 +480,7 @@ match game_state:
 				</li>
 		"""
 
+	#end
 	case 3:
 		if (given_player):
 			given_score_1+=1
@@ -484,7 +504,7 @@ match game_state:
 			<li>
 				
 				<input type ="hidden" name ="state" value="3"/>
-				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
+				<input type ="hidden" name ="element_1" value="{hash1(given_matches_total, given_matches_max, given_matches_burnable, given_score_1, given_score_2, given_round, given_element_2, given_player)}"/>
 				<input type ="hidden" name ="element_2" value="{given_element_2}"/>
 				
 				<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
@@ -496,6 +516,7 @@ match game_state:
 				<input type ="hidden" name ="player" value="{given_player}"/>
 				<input type ="hidden" name ="matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
 				<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
+				<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
 				<input type ="hidden" name ="matches_removed" value="0"/><!-- must be send -->
 
 				
@@ -510,10 +531,12 @@ match game_state:
 					<input type ="hidden" name ="playername_1" value="{given_playername_1}"/>
 					<input type ="hidden" name ="playername_2" value="{given_playername_2}"/>
 					<input type ="hidden" name ="matches_max" value="{given_matches_max}"/>
+					<input type ="hidden" name ="matches_burnable" value="{given_matches_burnable}"/>
 					
 					<input type ="submit" value ="quitter" class="button">
 			</li>
 		"""
+	
 
 
 css_flamed_frame=f"""
