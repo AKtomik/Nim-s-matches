@@ -74,9 +74,16 @@ def hash1(f_int_m1, f_int_m2, f_int_m3, f_int_i1, f_int_i2, f_int_r2, f_int_r1, 
 
 
 #special case :
-if ((given_state=="1") and (check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max) or check(given_matches_flammable))):
-	given_state="0"
-	fail_message="remplis intégralement les options !"
+if (given_state=="1"):
+	if ((check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max) or check(given_matches_flammable))):
+		given_state="0"
+		fail_message="remplis intégralement les options !"
+	elif (int(given_matches_max) < 0 or int(given_matches_flammable) < 0):
+		given_state="0"
+		fail_message="pas de valeur négative ! (nulle acceptés)"
+	elif (int(given_matches_flammable) > 21):
+		given_state="0"
+		fail_message="trop d'allumettes inflammable !"
 
 
 if (check(given_state) or (given_state=="0")):
@@ -200,6 +207,9 @@ else:
 			if (given_round<0 or given_round>given_matches_max):
 				cheater=True
 				fail_message=f"(incohérence)"
+				if (given_matches_flammable==0):
+					fail_message=f"sinon tu en avais pour une éternitée"
+
 				
 
 			#continuing... [->2]
@@ -265,12 +275,13 @@ else:
 if (game_state==0):
 	page_matches=f"""<section><img src="images/allumette6.png"></section>"""
 
-else:
-	#is no matches ?
-	given_matches_total-=given_matches_removed
-	if (given_matches_total<=0):
-		#yes ? finish the game.
-		game_state=3
+else: 
+	if (game_state==2):
+		#is no matches ?
+		given_matches_total-=given_matches_removed
+		if (given_matches_total<=0):
+			#yes ? finish the game.
+			game_state=3
 
 
 	page_text=""
@@ -314,6 +325,9 @@ match game_state:
 		</h1>
 		<p>
 			oui, tu as bidouillé l'URL, et je le sais.
+		</p>
+		<p>
+			on est pas dans un bac à sable ici
 		</p>
 		"""
 
@@ -394,6 +408,8 @@ match game_state:
 	#in game
 	case 2:
 
+		page_root+=f"""<div class="anticheat">URL protégée par l'anti-cheat</div>"""
+
 		if (given_matches_removed <= 0):
 			here_tocheck=1
 		elif (given_matches_removed>given_matches_total):
@@ -411,8 +427,10 @@ match game_state:
 			<input type ="radio" class="matche" id="matches_{i+1}" name="matches_removed" value="{i+1}"{here_checked}>
 			"""+page_root_check
 			i+=1
+		if (i==0):
+			page_root_check=f"""<input type ="radio" class="matche" id="matches_0" name="matches_removed" value="0" checked>"""
 		
-		page_root=f"{page_root_check}"
+		page_root+=f"{page_root_check}"
 
 
 
@@ -512,6 +530,8 @@ match game_state:
 
 	#end
 	case 3:
+		page_root+=f"""<div class="anticheat">URL protégée par l'anti-cheat</div>"""
+
 		if (given_player):
 			given_score_1+=1
 		else:
@@ -652,6 +672,18 @@ if (game_state!=0):
 page_css=f"""
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
 body {{
+	
+
+	.anticheat {{
+		font-size: 15px;
+		font-family: 'Open Sans', sans-serif;
+		color: #aaaaaa;
+		position: absolute;
+		left: 5%;
+		bottom: 5%;
+		opacity: 1;
+		z-align: 1;
+	}}
 
 	.link_label {{
 		cursor: pointer;
@@ -694,12 +726,11 @@ body {{
 			}}
 
 			footer {{
-				
+				width:100%;
+				height:90%;
 				/* radio and parth to display is mooved to ROOT */
 				color:#770077;
 
-				width:100%;
-				height:0%;/*!no matter*/
 			}}
 		}}
 	}}
