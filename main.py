@@ -19,15 +19,19 @@ options_player_color_2="#0000ff"
 
 
 
-given_matches_total=datas.getvalue("send_matches_total")
+given_state=datas.getvalue("send_state")
+
 given_matches_max=datas.getvalue("send_matches_max")
-given_matches_removed=datas.getvalue("send_matches_removed")
-given_player=datas.getvalue("send_player")
-#true = player 1
-#false = player 2
 given_playername_1=datas.getvalue("send_playername_1")
 given_playername_2=datas.getvalue("send_playername_2")
 
+
+#true = player 1
+#false = player 2
+given_player=datas.getvalue("send_player")
+given_round=datas.getvalue("send_round")
+given_matches_total=datas.getvalue("send_matches_total")
+given_matches_removed=datas.getvalue("send_matches_removed")
 
 #--- state ---
 
@@ -35,38 +39,125 @@ given_playername_2=datas.getvalue("send_playername_2")
 # 1 = game's menu. select your names and other things.
 # 2 = gameplay. just, playing.
 # 3 = end. who wins ? me
+game_state=-1
+cheater=False
 
-game_state=2
 
-#is round informations missing ?
-if ((given_matches_total==None) or (given_player==None)):
-	#yes ? restart the game.
-	if (options_debug_satement): print("<p>DBUG : action/restart</p>")
-	if (given_matches_max!= None): given_matches_total=int(given_matches_max)
-	given_matches_removed=0
-	given_player=(rickroll(0,1)==1)
-else:
-	#no ? cool.
-	given_matches_total=int(given_matches_total)
-	given_matches_removed=int(given_matches_removed)
-	given_player=(given_player=="True")
+def check(f_value, f_intcheck=True):
+	if (f_value==None):
+		return True
+	if (f_intcheck):
+		try:
+			int(f_value)
+		#except ValueError:
+		#this execept any error.  but not cool for dbuging !
+		except:
+			return True
+	return False
+	#isinstance(f_value, f_type)
 
-#is menu informations missing ?
-if ((given_playername_1==None) or (given_playername_2==None) or (given_matches_max==None)):
-	#yes ? goto menu.
-	if (options_debug_satement): print("<p>DBUG : action/menu</p>")
+
+def hash1(f_int1, f_int2, f_int3, f_int4, f_bool1):
+	return 0
+	
+
+
+
+if (check(given_state) or (given_state=="0")):
+	#reseting... [->1]
 	game_state=1
+	if (options_debug_satement): print("<p>DBUG : action/menu</p>")
+	given_state="0"
 	if (given_matches_max == None):
-		given_matches_max=21
-		given_matches_total=21
-	else:
-		given_matches_max=int(given_matches_max)
-		given_matches_total=int(given_matches_max)
-	given_playername_1="unknow1"
-	given_playername_2="unknow2"
+		given_matches_max="21"
+	given_matches_total=given_matches_max
+	if (given_playername_1 == None):
+		given_playername_1="unknow1"
+	if (given_playername_2 == None):
+		given_playername_2="unknow2"
+	#!
+	given_round="0"
+	given_player=f"{(rickroll(0,1)==1)}"
+	given_matches_removed="0"
+
+
+
+
+
+given_state=int(given_state)
+
+#here you must have menu information.
+if (check(given_player,False) or check(given_playername_1,False) or check(given_playername_2,False) or check(given_matches_max)):
+	#no ? ur cheater. [->0]
+	cheater=True
+	#1/0
+	
 else:
+
+	given_player=(given_player=="True")
 	given_matches_max=int(given_matches_max)
 
+
+	if (given_state==1):
+		#starting... [->2]
+		game_state=2
+		if (options_debug_satement): print("<p>DBUG : action/start</p>")
+	
+		given_round="0"
+		given_matches_total=given_matches_max
+		given_matches_removed="0"
+
+	#here, you must have round informations.
+	if (check(given_matches_total) or check(given_matches_removed)):
+		if (options_debug_satement): print(f"<p>{check(given_matches_total)} or {check(given_matches_removed)}</p>")
+		#no ? ur cheater. [->0]
+		cheater=True
+		#1/0
+
+	else:
+		given_round=int(given_round)
+		given_matches_total=int(given_matches_total)
+		given_matches_removed=int(given_matches_removed)
+
+		if (given_state==2):
+			#checks
+			if (given_matches_total>given_matches_max or given_matches_total<0 or given_matches_max<0 ):
+				cheater=True
+			if (given_matches_removed>3 or given_matches_removed<0):
+			# or given_matches_total+given_matches_removed>given_matches_max or given_matches_total-given_matches_removed<0#noo !!
+				cheater=True
+
+			#continuing... [->2]
+			game_state=2
+
+
+		if (given_state==3):
+			#check
+			if (given_matches_total!=0):
+				cheater=True
+
+
+			#restarting... [->2]
+			game_state=2
+			#given_round=0#!
+			given_matches_total=given_matches_max
+			given_matches_removed=0
+			#given_player=(rickroll(0,1)==1)#!
+
+
+
+#here, you must have a state.
+if (game_state==-1):
+	#no ? ur cheater. [->0]
+	cheater=True
+	#1/0
+
+
+
+if (cheater):
+	game_state=0
+	#avoid errors
+	given_player=False
 
 
 if (given_player):
@@ -84,29 +175,32 @@ else:
 
 #--- matches ---
 
+if (game_state==0):
+	page_matches=f"""<section><img src="images/allumette6.png"></section>"""
 
-#is no matches ?
-given_matches_total-=given_matches_removed
-if (given_matches_total<=0):
-	#yes ? finish the game.
-	game_state=3
+else:
+	#is no matches ?
+	given_matches_total-=given_matches_removed
+	if (given_matches_total<=0):
+		#yes ? finish the game.
+		game_state=3
 
 
-page_text=""
-page_form=""
-page_matches=""
-if (given_matches_total < 0):
-	given_matches_total=0
-for i in range (given_matches_total):
-	if (given_matches_total-i <= 3 and game_state==2):
-		page_matches+=f"""<section><label for="matches_{given_matches_total-i}" class="link_label"><img src="images/allumette4.png" class="flammable"><footer>⮝</footer></label></section>"""
-	else:
-		page_matches+=f"""<section><img src="images/allumette1.png"></section>"""
-for i in range (given_matches_removed):
-	page_matches+=f"""<section><img src="images/allumette2.png"></section>"""
-for i in range (given_matches_max-given_matches_total-given_matches_removed):
-	page_matches+=f"""<section><img src="images/allumette3.png"></section>"""
-# height="{25}%" width="{3}%"
+	page_text=""
+	page_form=""
+	page_matches=""
+	if (given_matches_total < 0):
+		given_matches_total=0
+	for i in range (given_matches_total):
+		if (given_matches_total-i <= 3 and game_state==2):
+			page_matches+=f"""<section><label for="matches_{given_matches_total-i}" class="link_label"><img src="images/allumette4.png" class="flammable"><footer>⮝</footer></label></section>"""
+		else:
+			page_matches+=f"""<section><img src="images/allumette1.png"></section>"""
+	for i in range (given_matches_removed):
+		page_matches+=f"""<section><img src="images/allumette2.png"></section>"""
+	for i in range (given_matches_max-given_matches_total-given_matches_removed):
+		page_matches+=f"""<section><img src="images/allumette3.png"></section>"""
+	# height="{25}%" width="{3}%"
 
 
 
@@ -121,6 +215,33 @@ def plurial(f_number):
 
 
 match game_state:
+
+	case 0:
+		page_text=f"""
+		<h1>
+		tricheur !!
+		</h1>
+		<p>
+			oui, tu as bidouillé l'URL, et je le sais.
+		</p>
+		"""
+
+
+		page_form_inside=f"""
+		<form method ="GET" action ="main.py">
+		<ul>
+			<input type ="hidden" name ="send_state" value="0"/>
+
+			<li>
+				<label>retourne jouer <b>normalement</b> :</label>
+			</li>
+			<li>
+				<input type ="submit" value ="OK" class="button">
+			</li>
+		</ul>
+		</form>
+		"""
+
 	case 1:
 		page_text=f"""
 		<h1>
@@ -143,7 +264,9 @@ match game_state:
 		page_form_inside=f"""
 		<form method ="GET" action ="main.py">
 		<ul>
-			<input type ="hidden" name ="send_matches_removed" value="{given_matches_removed}"/>
+			<input type ="hidden" name ="send_state" value="1"/>
+
+
 			<li>
 				<label for ="name1" class="for_player_1">joueur 1 :</label>
 				<input type ="text" id="name1" name ="send_playername_1" value="{given_playername_1}"/>
@@ -159,6 +282,8 @@ match game_state:
 			<li>
 				<input type ="submit" value ="OK" class="button">
 			</li>
+
+			<input type ="hidden" name ="send_player" value="{given_player}"/>
 		</ul>
 		</form>
 		"""
@@ -225,13 +350,20 @@ match game_state:
 			"""
 			i+=1
 
+		given_round=given_round+1
+		given_player=not given_player
 		page_form_inside=f"""
+
+			<input type ="hidden" name ="send_state" value="2"/>
+
 			<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
 			<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
-			<input type ="hidden" name ="send_player" value="{not given_player}"/>
+			<input type ="hidden" name ="send_round" value="{given_round}"/>
 			
+			<input type ="hidden" name ="send_player" value="{given_player}"/>
 			<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/>
 			<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
+
 
 			<ul>
 				<!--
@@ -270,8 +402,32 @@ match game_state:
 		page_form_inside=f"""
 		<ul>
 			<li>
+				
+				<input type ="hidden" name ="send_state" value="3"/>
+				
+				<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
+				<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
+				<input type ="hidden" name ="send_round" value="{given_round}"/>
+
+				<input type ="hidden" name ="send_player" value="{given_player}"/>
+				<input type ="hidden" name ="send_matches_total" value="{given_matches_total}"/><!-- is 0 at this point -->
 				<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
-				<input type ="submit" value ="RECOMMENCER" class="button">
+				<input type ="hidden" name ="send_matches_removed" value="0"/><!-- must be send -->
+
+				
+				<input type ="submit" value ="recomencer" class="button">
+				</form>
+			</li>
+			<li>
+				<form method ="GET" action ="main.py">
+					<input type ="hidden" name ="send_state" value="0"/>
+					<!--it make it like a list, so except an error, so reset-->
+
+					<input type ="hidden" name ="send_playername_1" value="{given_playername_1}"/>
+					<input type ="hidden" name ="send_playername_2" value="{given_playername_2}"/>
+					<input type ="hidden" name ="send_matches_max" value="{given_matches_max}"/>
+					
+					<input type ="submit" value ="quitter" class="button">
 			</li>
 		</ul>
 		"""
